@@ -17,14 +17,43 @@ use actix_web_httpauth::extractors::AuthenticationError;
 
 use std::sync::RwLock;
 use config::{File};
+use rexiv2::Rexiv2Error;
 
+#[cfg(test)]
+mod tests {
+    use crate::remove_metadata;
+    use std::path::Path;
+
+    #[test]
+    fn it_works() {
+        remove_metadata(Path::new("/Users/findus/Downloads/exif.JPG"));
+    }
+}
 
 lazy_static! {
 	static ref SETTINGS: RwLock<config::Config> = RwLock::new(config::Config::default());
 }
 
+fn remove_metadata(filepath: &Path) -> Result<(), Rexiv2Error> {
+    if filepath.exists() {
+        println!("File exists");
+    }
+    let metadata = rexiv2::Metadata::new_from_path(filepath).unwrap();
+    println!("{:#?}", metadata);
+    metadata.clear_exif();
+    metadata.save_to_file(filepath)?;
+    Ok(())
+}
+
+fn copy_to_public(path: &Path, filename: &str) {
+    let pub_path = SETTINGS.write().unwrap().get::<String>("path").unwrap();
+    std::fs::copy(path, Path::new(&(pub_path + filename)));
+}
+
 async fn save_file(payload: Multipart) -> Result<HttpResponse, Error> {
     // iterate over multipart stream
+
+    println!("Save file");
 
     let mut filenames: Vec<String> = Vec::new();
 
@@ -71,6 +100,7 @@ async fn save_file(payload: Multipart) -> Result<HttpResponse, Error> {
 }
 
 async fn validator(req: ServiceRequest, credentials: BearerAuth) -> Result<ServiceRequest, Error> {
+    println!("Validator");
      let token: String = SETTINGS.write().unwrap().get::<String>("token").unwrap();
      if credentials.token() == token {
          Ok(req)
@@ -96,6 +126,9 @@ async fn main() -> std::io::Result<()> {
 
     let ip = "0.0.0.0:3000";
 
+    println!("Running at: {}", ip);
+    println!("Path: {}", SETTINGS.write().unwrap().get::<String>("path").unwrap());
+    println!("URL: {}", SETTINGS.write().unwrap().get::<String>("url").unwrap());
 
     HttpServer::new(|| {
 
