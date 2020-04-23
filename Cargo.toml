@@ -1,12 +1,12 @@
 [package]
-name = "multipart-example"
+name = "Media-Uploader"
 version = "0.3.0"
-authors = ["Bevan Hunt <bevan@bevanhunt.com>"]
-edition = "2018"
+authors = ["Philipp Hentschel <philipp@f1ndus.de>"]
+edition = "2020"
 license = "MIT"
-description = "Simple file uploader in Actix Web with Async/Await"
+description = "Uploads all kind of media and strips metadata"
 keywords = ["actix", "actix-web", "multipart"]
-repository = "https://github.com/actix/examples"
+repository = "https://github.com/f1ndus/media-uploader"
 readme = "README.md"
 
 [dependencies]
