@@ -2,7 +2,7 @@
 name = "Media-Uploader"
 version = "0.3.0"
 authors = ["Philipp Hentschel <philipp@f1ndus.de>"]
-edition = "2020"
+edition = "2018"
 license = "MIT"
 description = "Uploads all kind of media and strips metadata"
 keywords = ["actix", "actix-web", "multipart"]
