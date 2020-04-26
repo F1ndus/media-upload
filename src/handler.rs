@@ -9,6 +9,7 @@ use url::Url;
 use crate::cfg::ServerConfig;
 use crate::io::*;
 use crate::metadata;
+use crate::exif;
 
 pub(crate) async fn save_file(payload: Multipart, data: Data<ServerConfig>) -> Result<HttpResponse, Error> {
     // iterate over multipart stream
@@ -47,6 +48,7 @@ pub(crate) async fn save_file(payload: Multipart, data: Data<ServerConfig>) -> R
                 continue
             },
             "jpg" | "png" => {
+                let image = exif::Image { path: temp_path.as_ref() };
                 match metadata::remove_img_metadata(temp_path.as_ref()) {
                     Ok(_) => {
                         copy_file(temp_path.as_ref(), Path::new(public_path));
