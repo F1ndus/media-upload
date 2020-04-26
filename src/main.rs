@@ -12,6 +12,7 @@ mod metadata;
 mod cfg;
 mod validation;
 mod handler;
+mod exif_image;
 
 #[cfg(test)]
 mod tests {

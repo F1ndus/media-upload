@@ -1,32 +1,38 @@
 use std::path::Path;
 
 use rexiv2::Rexiv2Error;
+use crate::exif_image;
 
-pub(crate) fn remove_img_metadata(filepath: &Path) -> Result<(), Rexiv2Error> {
+pub trait MetaData {
+    fn remove_metadata(&self) -> Option<&Path>;
+}
 
-    // Check if file exists
-    match filepath.exists() {
-        true => {
-            let metadata = rexiv2::Metadata::new_from_path(filepath).unwrap();
-            println!("Supports exif: {} -> {}", filepath.clone().display(), metadata.supports_exif());
+pub struct VideoFile<'a> {
+    pub path: &'a str,
+}
 
-            match metadata.supports_exif() {
-                true => {
-                    metadata.clear_exif();
-                    metadata.save_to_file(filepath)?;
-                    println!("Stripped Metadata");
-                    Ok(())
-                }
-                _ => {
-                    println!("Passed file does not support exif");
-                    Err(Rexiv2Error::Internal(Option::from(String::from("File does not exit"))))
-                }
-            }
-
-        }
-        _ => {
-            Err(Rexiv2Error::Internal(Option::from(String::from("File does not exit"))))
-        }
+impl MetaData for VideoFile<'_> {
+    fn remove_metadata(&self) -> Option<&Path> {
+        exif_image::remove_img_metadata(self.path.as_ref())
     }
+}
 
+pub struct Image<'a> {
+    pub path: &'a str,
+}
+
+impl MetaData for Image<'_> {
+    fn remove_metadata(&self) -> Option<&Path> {
+        exif_image::remove_img_metadata(self.path.as_ref())
+    }
+}
+
+pub struct Noop<'a> {
+    pub path: &'a str,
+}
+
+impl MetaData for Noop<'_> {
+    fn remove_metadata(&self) -> Option<&Path> {
+        Some(self.path.as_ref())
+    }
 }

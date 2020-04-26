@@ -9,7 +9,7 @@ use url::Url;
 use crate::cfg::ServerConfig;
 use crate::io::*;
 use crate::metadata;
-use crate::exif;
+use std::fs::metadata;
 
 pub(crate) async fn save_file(payload: Multipart, data: Data<ServerConfig>) -> Result<HttpResponse, Error> {
     // iterate over multipart stream
@@ -42,28 +42,29 @@ pub(crate) async fn save_file(payload: Multipart, data: Data<ServerConfig>) -> R
         let path = format!("{}/{}", config.path, public_filename);
         let public_path= Path::new(&path);
 
-        match extension.to_lowercase().as_str() {
+        let meta_data: Option<Box<dyn metadata::MetaData>> = match extension.to_lowercase().as_str() {
             "mp4" |  "mov" | "webm" => {
                 //Err(ErrorInternalServerError("Blacklisted filetype"))
-                continue
+                None
             },
             "jpg" | "png" => {
-                let image = exif::Image { path: temp_path.as_ref() };
-                match metadata::remove_img_metadata(temp_path.as_ref()) {
-                    Ok(_) => {
-                        copy_file(temp_path.as_ref(), Path::new(public_path));
-                    }
-                    _ => {
-                        continue
-                    }
-                }
-
+                Some(Box::new(metadata::Image { path: temp_path.as_ref() }))
             },
             _ => {
-                copy_file(temp_path.as_ref(), public_path);
+                Some(Box::new(metadata::Noop { path: temp_path.as_ref() }))
             }
-        }
+        };
 
+        if let Some(meta_data) = meta_data {
+
+            if let Some(stripped_file_path) = meta_data.as_ref().remove_metadata() {
+                copy_file(stripped_file_path, Path::new(public_path));
+            } else {
+                println!("Error Occured while removing metadata");
+            }
+        } else {
+            println!("No handler found for this filetype");
+        }
 
     }
 
