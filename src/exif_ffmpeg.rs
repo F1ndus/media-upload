@@ -39,7 +39,7 @@ fn convert_file(file: &Path) -> Result<PathBuf, Error> {
         .ok_or(ConvertError::FileCreationFailed)?
         .to_str().ok_or(ConvertError::toStrFailed)?;
 
-    let out = format!("/tmp/procesjjjsed/{}", filename);
+    let out = format!("/tmp/processed/{}", filename);
     std::fs::create_dir_all(Path::new("/tmp/processed/"))?;
     let output = Command::new("ffmpeg")
         .arg("-y")
@@ -57,7 +57,7 @@ fn convert_file(file: &Path) -> Result<PathBuf, Error> {
 
     println!("{}", output.status.success());
     if output.status.code() != Some(0) {
-         bail!("oof");
+         bail!("FFmpeg quit with a non zero exit code!");
     }
 
     let mut path = PathBuf::new();
