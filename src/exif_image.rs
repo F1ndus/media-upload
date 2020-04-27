@@ -1,7 +1,7 @@
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use rexiv2::Rexiv2Error;
 
-pub(crate) fn remove_img_metadata(filepath: &Path) -> Option<&Path> {
+pub(crate) fn remove_img_metadata(filepath: &Path) -> Option<PathBuf> {
 
     // Check if file exists
     match filepath.exists() {
@@ -13,7 +13,7 @@ pub(crate) fn remove_img_metadata(filepath: &Path) -> Option<&Path> {
                     metadata.clear_exif();
                     if let Ok(res) = metadata.save_to_file(filepath) {
                         println!("Stripped Metadata");
-                        Some((filepath))
+                        Some((PathBuf::from(filepath)))
                     } else {
                         None
                     }

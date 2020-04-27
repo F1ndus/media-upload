@@ -1,5 +1,6 @@
 extern crate config;
 extern crate lazy_static;
+#[macro_use] extern crate failure;
 
 use actix_web::{App, HttpServer, middleware, web};
 use actix_web_httpauth::middleware::HttpAuthentication;
@@ -13,6 +14,7 @@ mod cfg;
 mod validation;
 mod handler;
 mod exif_image;
+mod exif_ffmpeg;
 
 #[cfg(test)]
 mod tests {

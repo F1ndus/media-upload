@@ -10,6 +10,7 @@ use crate::cfg::ServerConfig;
 use crate::io::*;
 use crate::metadata;
 use std::fs::metadata;
+use actix_web::error::ErrorInternalServerError;
 
 pub(crate) async fn save_file(payload: Multipart, data: Data<ServerConfig>) -> Result<HttpResponse, Error> {
     // iterate over multipart stream
@@ -44,8 +45,7 @@ pub(crate) async fn save_file(payload: Multipart, data: Data<ServerConfig>) -> R
 
         let meta_data: Option<Box<dyn metadata::MetaData>> = match extension.to_lowercase().as_str() {
             "mp4" |  "mov" | "webm" => {
-                //Err(ErrorInternalServerError("Blacklisted filetype"))
-                None
+                Some(Box::new(metadata::VideoFile { path: temp_path.as_ref()}))
             },
             "jpg" | "png" => {
                 Some(Box::new(metadata::Image { path: temp_path.as_ref() }))
@@ -58,18 +58,20 @@ pub(crate) async fn save_file(payload: Multipart, data: Data<ServerConfig>) -> R
         if let Some(meta_data) = meta_data {
 
             if let Some(stripped_file_path) = meta_data.as_ref().remove_metadata() {
-                copy_file(stripped_file_path, Path::new(public_path));
+                copy_file(&stripped_file_path, Path::new(public_path));
             } else {
                 println!("Error Occured while removing metadata");
+                return Err(ErrorInternalServerError("misdt"))
             }
         } else {
             println!("No handler found for this filetype");
+            return Err(ErrorInternalServerError("misdt"))
         }
 
     }
 
     let links = filenames.iter()
-        .map( |filename| format!("{}{}", config.url.to_string(), filename))
+        .map( |filename| format!("{}{}\n", config.url.to_string(), filename))
         .collect::<String>();
 
     Ok(HttpResponse::Ok().content_type("text/plain").body(links))

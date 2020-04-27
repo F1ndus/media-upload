@@ -1,5 +1,5 @@
 use std::io::Write;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use actix_multipart::{Field};
@@ -7,7 +7,7 @@ use actix_web::{Error, web};
 use actix_web::http::header::{ContentDisposition};
 use futures::StreamExt;
 
-pub(crate) fn copy_file(file: &Path, destination: &Path) -> Result<(), Error> {
+pub(crate) fn copy_file(file: &PathBuf, destination: &Path) -> Result<(), Error> {
     println!("Move img to {}", destination.to_str().unwrap().to_owned());
     std::fs::copy(file, &destination)?;
     Ok(())
