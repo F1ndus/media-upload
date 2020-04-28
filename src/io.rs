@@ -44,7 +44,7 @@ pub(crate) fn generate_public_filename(content_type: &ContentDisposition, iterat
 
     let since_the_epoch = start.duration_since(UNIX_EPOCH)?;
 
-    let epoch_in_seconds = since_the_epoch.as_secs();
+    let epoch_in_seconds = since_the_epoch.as_nanos();
 
     let filename_pub_epoch = format!("{}_{}.{}", epoch_in_seconds, iteration, extension);
 
