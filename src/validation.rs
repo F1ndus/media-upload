@@ -4,7 +4,6 @@ use actix_web_httpauth::extractors::AuthenticationError;
 use actix_web_httpauth::extractors::bearer::{BearerAuth, Config};
 
 use crate::cfg::ServerConfig;
-use actix_web::web::Data;
 
 pub(crate) async fn validator(req: ServiceRequest, credentials: BearerAuth) -> Result<ServiceRequest, Error> {
     let config = req.app_data::<ServerConfig>();

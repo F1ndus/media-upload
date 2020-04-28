@@ -1,6 +1,6 @@
 
 use std::path::{Path, PathBuf};
-use std::process::{Command, ExitStatus};
+use std::process::{Command};
 use std::io::{self, Write};
 use failure::Error;
 
@@ -13,9 +13,7 @@ enum ConvertError {
     #[fail(display = "File Creation Failed Error")]
     FileCreationFailed,
     #[fail(display = "ToStr Failed")]
-    toStrFailed,
-    #[fail(display = "FFmpegConversion Failed")]
-    FFmpegConversionFailed,
+    ToStrFailed
 }
 
 fn convert_file(file: &Path) -> Result<PathBuf, Error> {
@@ -23,13 +21,13 @@ fn convert_file(file: &Path) -> Result<PathBuf, Error> {
     // let extension = file.extension()?.to_str()?;
     let filename = file.file_name()
         .ok_or(ConvertError::FileCreationFailed)?
-        .to_str().ok_or(ConvertError::toStrFailed)?;
+        .to_str().ok_or(ConvertError::ToStrFailed)?;
 
     let out = format!("/tmp/processed/{}", filename);
     std::fs::create_dir_all(Path::new("/tmp/processed/"))?;
     let output = Command::new("ffmpeg")
         .arg("-y")
-        .args(&["-i", file.to_str().ok_or(ConvertError::toStrFailed)?])
+        .args(&["-i", file.to_str().ok_or(ConvertError::ToStrFailed)?])
         .args(&["-map_metadata", "-1"])
         .args(&["-c:v","copy"])
         .args(&["-c:a","copy"])

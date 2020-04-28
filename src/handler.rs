@@ -4,15 +4,10 @@ use actix_multipart::Multipart;
 use actix_web::{Error, HttpResponse};
 use actix_web::web::Data;
 use futures::StreamExt;
-use url::Url;
-
 use crate::cfg::ServerConfig;
 use crate::io::*;
 use crate::metadata;
-use std::fs::metadata;
 use actix_web::error::ErrorInternalServerError;
-use infer::Infer;
-use infer::Type;
 
 pub(crate) async fn save_file(payload: Multipart, data: Data<ServerConfig>) -> Result<HttpResponse, Error> {
     // iterate over multipart stream
@@ -41,9 +36,6 @@ pub(crate) async fn save_file(payload: Multipart, data: Data<ServerConfig>) -> R
 
         save_file_to_temp_folder(&mut field, temp_path.clone()).await?;
 
-        let extension = get_filename_extension(Path::new(&public_filename))
-            .expect("Cannot get filename extension");
-
         let path = format!("{}/{}", config.path, public_filename);
         let public_path= Path::new(&path);
 
@@ -63,7 +55,7 @@ pub(crate) async fn save_file(payload: Multipart, data: Data<ServerConfig>) -> R
         if let Some(meta_data) = meta_data {
 
             if let Ok(stripped_file_path) = meta_data.as_ref().remove_metadata() {
-                copy_file(&stripped_file_path, Path::new(public_path));
+                copy_file(&stripped_file_path, Path::new(public_path))?
             } else {
                 println!("Error Occured while removing metadata");
                 return Err(ErrorInternalServerError(

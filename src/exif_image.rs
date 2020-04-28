@@ -1,5 +1,4 @@
 use std::path::{Path, PathBuf};
-use rexiv2::Rexiv2Error;
 use failure::Error;
 
 pub(crate) fn remove_img_metadata(filepath: &Path) -> Result<PathBuf, Error> {
@@ -21,7 +20,7 @@ pub(crate) fn remove_img_metadata(filepath: &Path) -> Result<PathBuf, Error> {
             metadata.save_to_file(filepath)?;
 
             println!("Stripped Metadata");
-            Ok((PathBuf::from(filepath)))
+            Ok(PathBuf::from(filepath))
         }
         _ => {
             println!("Passed file does not support exif");

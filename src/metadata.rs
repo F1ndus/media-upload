@@ -1,6 +1,4 @@
-use std::path::{Path, PathBuf};
-
-use rexiv2::Rexiv2Error;
+use std::path::{PathBuf};
 use crate::exif_image;
 use crate::exif_ffmpeg;
 use failure::Error;

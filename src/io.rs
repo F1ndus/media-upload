@@ -7,7 +7,6 @@ use actix_web::http::header::{ContentDisposition};
 use futures::StreamExt;
 use failure::Error;
 use actix_web::web;
-use std::fs::File;
 
 pub(crate) fn copy_file(file: &PathBuf, destination: &Path) -> Result<(), Error> {
     println!("Move img to {}", destination.to_str().unwrap().to_owned());
