@@ -4,22 +4,8 @@ use std::process::{Command, ExitStatus};
 use std::io::{self, Write};
 use failure::Error;
 
-pub(crate) fn remove_video_metadata(filepath: &Path) -> Option<PathBuf> {
-
-    // Check if file exists
-    match filepath.exists() {
-        true => {
-            if let Ok(path) = convert_file(filepath) {
-                Some(path)
-            } else {
-                None
-            }
-        }
-        _ => {
-            None
-        }
-    }
-
+pub(crate) fn remove_video_metadata(filepath: &Path) -> Result<PathBuf, Error> {
+     convert_file(filepath)
 }
 
 #[derive(Debug, Fail)]

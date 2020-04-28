@@ -3,9 +3,10 @@ use std::path::{Path, PathBuf};
 use rexiv2::Rexiv2Error;
 use crate::exif_image;
 use crate::exif_ffmpeg;
+use failure::Error;
 
 pub trait MetaData {
-    fn remove_metadata(&self) -> Option<PathBuf>;
+    fn remove_metadata(&self) -> Result<PathBuf, Error>;
 }
 
 pub struct VideoFile<'a> {
@@ -13,7 +14,7 @@ pub struct VideoFile<'a> {
 }
 
 impl MetaData for VideoFile<'_> {
-    fn remove_metadata(&self) -> Option<PathBuf> {
+    fn remove_metadata(&self) -> Result<PathBuf, Error> {
         exif_ffmpeg::remove_video_metadata(self.path.as_ref())
     }
 }
@@ -22,7 +23,7 @@ pub struct Image<'a> {
     pub path: &'a str,
 }
 impl MetaData for Image<'_> {
-    fn remove_metadata(&self) -> Option<PathBuf> {
+    fn remove_metadata(&self) -> Result<PathBuf, Error> {
         exif_image::remove_img_metadata(self.path.as_ref())
     }
 }
@@ -32,7 +33,7 @@ pub struct Noop<'a> {
 }
 
 impl MetaData for Noop<'_> {
-    fn remove_metadata(&self) -> Option<PathBuf> {
-        Some(PathBuf::new())
+    fn remove_metadata(&self) -> Result<PathBuf, Error> {
+        Ok(PathBuf::new())
     }
 }

@@ -25,10 +25,12 @@ pub(crate) async fn save_file(payload: Multipart, data: Data<ServerConfig>) -> R
 
     while let Some((i, item)) = p.next().await {
         let mut field = item?;
+
         let content_type = field.content_disposition().unwrap();
+        let user_filename = &content_type.get_filename().unwrap();
 
         let public_filename =
-            generate_public_filename(content_type, i)
+            generate_public_filename(&content_type, i)
             .expect("Cannot generate public filename");
 
         filenames.push(format!("{}", public_filename));
@@ -57,15 +59,19 @@ pub(crate) async fn save_file(payload: Multipart, data: Data<ServerConfig>) -> R
 
         if let Some(meta_data) = meta_data {
 
-            if let Some(stripped_file_path) = meta_data.as_ref().remove_metadata() {
+            if let Ok(stripped_file_path) = meta_data.as_ref().remove_metadata() {
                 copy_file(&stripped_file_path, Path::new(public_path));
             } else {
                 println!("Error Occured while removing metadata");
-                return Err(ErrorInternalServerError("misdt"))
+                return Err(ErrorInternalServerError(
+                    format!("Something went wrong while stripping the metadata of {}",
+                            user_filename)));
             }
         } else {
             println!("No handler found for this filetype");
-            return Err(ErrorInternalServerError("misdt"))
+            return Err(ErrorInternalServerError(
+                format!("Sorry, I cannot handle this sort of file {}", user_filename)
+            ))
         }
 
     }
