@@ -11,6 +11,8 @@ use crate::io::*;
 use crate::metadata;
 use std::fs::metadata;
 use actix_web::error::ErrorInternalServerError;
+use infer::Infer;
+use infer::Type;
 
 pub(crate) async fn save_file(payload: Multipart, data: Data<ServerConfig>) -> Result<HttpResponse, Error> {
     // iterate over multipart stream
@@ -27,7 +29,7 @@ pub(crate) async fn save_file(payload: Multipart, data: Data<ServerConfig>) -> R
         let mut field = item?;
 
         let content_type = field.content_disposition().unwrap();
-        let user_filename = &content_type.get_filename().unwrap();
+        let user_filename = content_type.get_filename().unwrap();
 
         let public_filename =
             generate_public_filename(&content_type, i)
@@ -45,16 +47,17 @@ pub(crate) async fn save_file(payload: Multipart, data: Data<ServerConfig>) -> R
         let path = format!("{}/{}", config.path, public_filename);
         let public_path= Path::new(&path);
 
-        let meta_data: Option<Box<dyn metadata::MetaData>> = match extension.to_lowercase().as_str() {
-            "mp4" |  "mov" | "webm" => {
-                Some(Box::new(metadata::VideoFile { path: temp_path.as_ref()}))
-            },
-            "jpg" | "png" => {
-                Some(Box::new(metadata::Image { path: temp_path.as_ref() }))
-            },
-            _ => {
-                Some(Box::new(metadata::Noop { path: temp_path.as_ref() }))
-            }
+        let file_type_analyzer = infer::Infer::new();
+        let filetype = file_type_analyzer.get_from_path(&temp_path).unwrap();
+
+        let meta_data: Option<Box<dyn metadata::MetaData>> = match filetype {
+            Some(t) if t.mime.contains("image")
+                => Some(Box::new(metadata::Image { path: temp_path.as_ref() })),
+
+            Some(t) if t.mime.contains("video")
+                => Some(Box::new(metadata::VideoFile { path: temp_path.as_ref()})),
+            Some(_) => Some(Box::new(metadata::Noop { path: temp_path.as_ref() })),
+            None => None
         };
 
         if let Some(meta_data) = meta_data {
