@@ -1,5 +1,6 @@
 extern crate config;
 extern crate lazy_static;
+extern crate infer;
 #[macro_use] extern crate failure;
 
 use actix_web::{App, HttpServer, middleware, web};
