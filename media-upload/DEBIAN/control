@@ -1,0 +1,10 @@
+Package: media-upload
+Version: 0.3
+Section: custom
+Priority: optional
+Architecture: all
+Essential: no
+Installed-Size: 1024
+Maintainer: f1ndus.de
+Description: Uploads media to a folder
+Depends: ffmpeg, libgexiv2-dev

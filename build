@@ -1,0 +1,3 @@
+#!/bin/bash
+cargo build --release
+cp target/release/media-uploader media-upload/usr/local/bin/
