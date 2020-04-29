@@ -13,8 +13,8 @@ pub struct ServerConfig {
 
 pub fn load_config<'a>(config: &'a mut config::Config) -> &'a  mut config::Config {
         config
-        .merge(File::with_name("./config"))
-        .expect("Error loading config")
+        .merge(File::with_name("/etc/media-upload.toml"))
+        .expect("Error loading config, make sure it is in /etc/media-upload.toml")
 }
 
 pub fn parse_config() -> ServerConfig {
